@@ -47,7 +47,7 @@ class API(object):
                           API object keeps HTTP session.
     """
 
-    api_url = "https://api.bitflyer.jp"
+    api_url = "https://api.bitflyer.com"
 
     def __init__(self, api_key=None, api_secret=None, keep_session=False, timeout=None,
                  lock=None, logger=None, retry=0):
