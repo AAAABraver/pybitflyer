@@ -98,7 +98,10 @@ class API(object):
     def __request(self, endpoint, method="GET", params=None):
         url = self.api_url + endpoint
         body = ""
-        header = {"Content-Type": "application/json"}
+        header = {
+            "Content-Type": "application/json",
+            "Accept-Encoding": "gzip",
+        }
 
         if method == "POST":
             body = json.dumps(params)
