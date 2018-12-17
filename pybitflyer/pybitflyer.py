@@ -7,33 +7,9 @@ import hmac
 import hashlib
 import urllib
 from .exception import AuthException
-from requests.packages.urllib3.util.retry import Retry
-from requests.adapters import HTTPAdapter
 from requests_toolbelt.adapters.source import SourceAddressAdapter
-from threading import Lock
-from http import cookiejar
-import socket
-import time
+from requests_toolbelt.adapters.socket_options import TCPKeepAliveAdapter
 
-class TCPKeepAliveAdapter(requests.adapters.HTTPAdapter):
-    def __init__(self, **kwargs):
-        super(TCPKeepAliveAdapter, self).__init__(**kwargs)
-    def init_poolmanager(self, *args, **kwargs):
-# /etc/sysctl.conf
-#  net.ipv4.tcp_keepalive_time = 60
-#  net.ipv4.tcp_keepalive_intvl = 30
-#  net.ipv4.tcp_keepalive_probes = 3
-# # sysctl -p
-        from urllib3.connection import HTTPConnection
-        kwargs['socket_options'] = HTTPConnection.default_socket_options + [
-            (socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1),
-        ]
-        super(TCPKeepAliveAdapter, self).init_poolmanager(*args, **kwargs)
-
-class CookieBlockAllPolicy(cookiejar.CookiePolicy):
-    return_ok = set_ok = domain_return_ok = path_return_ok = lambda self, *args, **kwargs: False
-    netscape = True
-    rfc2965 = hide_cookie2 = False
 
 class API(object):
     """
@@ -51,8 +27,8 @@ class API(object):
     api_url = "https://api.bitflyer.com"
 
     def __init__(self, api_key=None, api_secret=None, keep_session=False, timeout=None,
-                 lock=None, logger=None, retry=0, ip_addr=None):
-        self.retry = retry
+                 lock=None, logger=None, keep_alive=False, ip_addr=None):
+        self.keep_alive = keep_alive
         self.api_key = api_key
         self.api_secret = api_secret
         self.timeout = timeout
@@ -68,15 +44,11 @@ class API(object):
 
     def _new_session(self, ip_addr=None):
         ses = requests.Session()
-        if self.retry > 0:
-            retry = Retry(total=self.retry,
-                          read=self.retry,
-                          connect=self.retry,
-                          backoff_factor=0.2,
-                          status_forcelist=[500, 502, 504],
-                          method_whitelist=frozenset(['GET', 'POST']))
-            ses.mount(API.api_url, TCPKeepAliveAdapter(max_retries=retry))
-        #ses.cookies.set_policy(CookieBlockAllPolicy())
+        if self.keep_alive:
+            keep_alive = TCPKeepAliveAdapter(idle=120, count=20, interval=10)
+            ses.mount('http://', keep_alive)
+            ses.mount('https://', keep_alive)
+
         if ip_addr:
             ses.mount('http://', SourceAddressAdapter(ip_addr))
             ses.mount('https://', SourceAddressAdapter(ip_addr))
