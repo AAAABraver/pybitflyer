@@ -9,6 +9,7 @@ import urllib
 from .exception import AuthException
 from requests.packages.urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
+from requests_toolbelt.adapters.source import SourceAddressAdapter
 from threading import Lock
 from http import cookiejar
 import socket
@@ -50,14 +51,14 @@ class API(object):
     api_url = "https://api.bitflyer.com"
 
     def __init__(self, api_key=None, api_secret=None, keep_session=False, timeout=None,
-                 lock=None, logger=None, retry=0):
+                 lock=None, logger=None, retry=0, ip_addr=None):
         self.retry = retry
         self.api_key = api_key
         self.api_secret = api_secret
         self.timeout = timeout
         self.lock = lock
         self.logger = logger
-        self.sess = self._new_session() if keep_session else None
+        self.sess = self._new_session(ip_addr) if keep_session else None
 
     def __enter__(self):
         return self
@@ -65,7 +66,7 @@ class API(object):
     def __exit__(self, *exc):
         self.close()
 
-    def _new_session(self):
+    def _new_session(self, ip_addr=None):
         ses = requests.Session()
         if self.retry > 0:
             retry = Retry(total=self.retry,
@@ -76,6 +77,10 @@ class API(object):
                           method_whitelist=frozenset(['GET', 'POST']))
             ses.mount(API.api_url, TCPKeepAliveAdapter(max_retries=retry))
         #ses.cookies.set_policy(CookieBlockAllPolicy())
+        if ip_addr:
+            ses.mount('http://', SourceAddressAdapter(ip_addr))
+            ses.mount('https://', SourceAddressAdapter(ip_addr))
+
         return ses
 
     def close(self):
