@@ -93,8 +93,8 @@ class API(object):
         else:
             with self.lock:
                 return self.__request(endpoint, method, params)
-            
-            
+
+
     def __request(self, endpoint, method="GET", params=None):
         url = self.api_url + endpoint
         body = ""
@@ -145,7 +145,7 @@ class API(object):
             except json.decoder.JSONDecodeError:
                 if self.logger:
                     self.logger.error("JSON Decode Error: {}".format(response.content))
-                raise 
+                raise
         return content
 
     """HTTP Public API"""
