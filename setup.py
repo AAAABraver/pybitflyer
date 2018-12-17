@@ -10,7 +10,7 @@ setup(
     author="yag_ays",
     author_email="yanagi.ayase@gmail.com",
     url="https://github.com/yagays/pybitflyer",
-    install_requires=['requests'],
+    install_requires=['requests', 'requests_toolbelt'],
     keywords=["bitcoin", "bitflyer", "wrapper", "REST API"],
     classifiers=[
         "Programming Language :: Python",
