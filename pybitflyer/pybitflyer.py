@@ -34,7 +34,8 @@ class API(object):
         self.timeout = timeout
         self.lock = lock
         self.logger = logger
-        self.sess = self._new_session(ip_addr) if keep_session else None
+        self.ip_addr = ip_addr
+        self.sess = self._new_session() if keep_session else None
 
     def __enter__(self):
         return self
@@ -42,16 +43,16 @@ class API(object):
     def __exit__(self, *exc):
         self.close()
 
-    def _new_session(self, ip_addr=None):
+    def _new_session(self):
         ses = requests.Session()
         if self.keep_alive:
             keep_alive = TCPKeepAliveAdapter(idle=120, count=20, interval=10)
             ses.mount('http://', keep_alive)
             ses.mount('https://', keep_alive)
 
-        if ip_addr:
-            ses.mount('http://', SourceAddressAdapter(ip_addr))
-            ses.mount('https://', SourceAddressAdapter(ip_addr))
+        if self.ip_addr:
+            ses.mount('http://', SourceAddressAdapter(self.ip_addr))
+            ses.mount('https://', SourceAddressAdapter(self.ip_addr))
 
         return ses
 
