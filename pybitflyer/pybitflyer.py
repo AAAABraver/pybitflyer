@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import sys
-import json
+import ujson as json
 import requests
 import time
 import hmac
