@@ -231,7 +231,6 @@ class API(object):
         Parameters
         ----------
         product_code: Designate "BTC_JPY", "FX_BTC_JPY" or "ETH_BTC".
-        count, before, after: See Pagination.
 
         Response
         --------
