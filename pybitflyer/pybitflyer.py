@@ -65,15 +65,15 @@ class API(object):
         if self.sess:
             self.sess.close()
 
-    def _request(self, endpoint, method="GET", params=None):
+    def _request(self, endpoint, method="GET", params=None, private=True):
         if self.lock is None:
-            return self.__request(endpoint, method, params)
+            return self.__request(endpoint, method, params, private)
         else:
             with self.lock:
-                return self.__request(endpoint, method, params)
+                return self.__request(endpoint, method, params, private)
 
 
-    def __request(self, endpoint, method="GET", params=None):
+    def __request(self, endpoint, method="GET", params=None, private=True):
         url = self.api_url + endpoint
         body = ""
         header = {
@@ -87,7 +87,7 @@ class API(object):
             if params:
                 body = "?" + urllib.parse.urlencode(params)
 
-        if self.api_key and self.api_secret:
+        if self.api_key and self.api_secret and private:
             access_timestamp = str(time.time())
             api_secret = str.encode(self.api_secret)
             text = str.encode(access_timestamp + method + endpoint + body)
@@ -144,7 +144,7 @@ class API(object):
         https://lightning.bitflyer.jp/docs?lang=en#order-book
         """
         endpoint = "/v1/board"
-        return self._request(endpoint, params=params)
+        return self._request(endpoint, params=params, private=False)
 
     def ticker(self, **params):
         """Ticker
@@ -162,7 +162,7 @@ class API(object):
         https://lightning.bitflyer.jp/docs?lang=en#ticker
         """
         endpoint = "/v1/ticker"
-        return self._request(endpoint, params=params)
+        return self._request(endpoint, params=params, private=False)
 
     def executions(self, **params):
         """Execution History
@@ -181,7 +181,7 @@ class API(object):
         https://lightning.bitflyer.jp/docs?lang=en#execution-history
         """
         endpoint = "/v1/executions"
-        return self._request(endpoint, params=params)
+        return self._request(endpoint, params=params, private=False)
 
     def getboardstate(self, **params):
         """Board status
@@ -218,7 +218,7 @@ class API(object):
         https://lightning.bitflyer.com/docs#%E6%9D%BF%E3%81%AE%E7%8A%B6%E6%85%8B
         """
         endpoint = "/v1/getboardstate"
-        return self._request(endpoint, params=params)
+        return self._request(endpoint, params=params, private=False)
 
     def gethealth(self, **params):
         """Exchange status
@@ -245,7 +245,7 @@ class API(object):
         https://lightning.bitflyer.jp/docs?lang=en#exchange-status
         """
         endpoint = "/v1/gethealth"
-        return self._request(endpoint, params=params)
+        return self._request(endpoint, params=params, private=False)
 
     def getchats(self, **params):
         """ Chat
@@ -264,7 +264,7 @@ class API(object):
         https://lightning.bitflyer.jp/docs?lang=en#chat
         """
         endpoint = "/v1/getchats"
-        return self._request(endpoint, params=params)
+        return self._request(endpoint, params=params, private=False)
 
     """HTTP Private API"""
 
