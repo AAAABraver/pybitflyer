@@ -282,6 +282,24 @@ class API(object):
 
     """HTTP Private API"""
 
+    def getpermissions(self, **params):
+        """Get API Key Permissions
+
+        API Type
+        --------
+        HTTP Private API
+
+        Docs
+        ----
+        https://lightning.bitflyer.jp/docs?lang=en#get-api-key-permissions
+        """
+        if not all([self.api_key, self.api_secret]):
+            raise AuthException()
+
+        endpoint = "/v1/me/getpermissions"
+        return self._request(endpoint, params=params)
+
+
     def getbalance(self, **params):
         """Get Account Asset Balance
 
