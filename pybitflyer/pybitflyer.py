@@ -128,6 +128,20 @@ class API(object):
 
     """HTTP Public API"""
 
+    def markets(self, **params):
+        """Market List
+
+        API Type
+        --------
+        HTTP Public API
+
+        Docs
+        ----
+        https://lightning.bitflyer.jp/docs?lang=en#market-list
+        """
+        endpoint = "/v1/markets"
+        return self._request(endpoint, params=params, private=False)
+
     def board(self, **params):
         """Order Book
 
